@@ -1,20 +1,21 @@
 addEventListener('fetch', (event) => {
-	event.respondWith(fetchAndReplace(event.request));
+	return event.respondWith(filterRequest(event.request));
 });
 
-async function fetchAndReplace(request) {
-	let whitelist = [ 'x.x.x.x.x' ];
-
-	let modifiedHeaders = new Headers();
-
-	modifiedHeaders.set('Content-Type', 'text/html');
-	modifiedHeaders.append('Pragma', 'no-cache');
+async function filterRequest(request) {
+	// IP addresses to allow
+	let whitelist = [ 'xx.xx.xx.xx', 'xx.xx.xx.xx' ];
 
 	// Check IP on whitelist, else show maintenace page
 	if (whitelist.includes(request.headers.get('cf-connecting-ip'))) {
+		// show website
 		return fetch(request);
 	} else {
-		//Allow users from trusted into site
+		// Update headers
+		let modifiedHeaders = new Headers();
+		modifiedHeaders.set('Content-Type', 'text/html');
+		modifiedHeaders.append('Pragma', 'no-cache');
+		// show maintenace page
 		return new Response(maintPage, {
 			headers: modifiedHeaders
 		});
@@ -22,11 +23,9 @@ async function fetchAndReplace(request) {
 }
 
 let maintPage = `
- 
 	<!doctype html>
 	<title>Site Maintenance</title>
 	<style>
-
 		body {
 			height: 100vh;
 			display: -webkit-box;
@@ -45,7 +44,6 @@ let maintPage = `
 			background: #2c2d44;
 			margin: 0;
 		}
-
 		.content {
 			padding: 16px;
 			color: #fff;
@@ -53,23 +51,17 @@ let maintPage = `
 			font-family: Montserrat, sans-serif;
 			text-shadow: 2px 2px #3d3d3d;
 		}
-
 		.icon {
 			width: 2rem;
 			height: 2rem;
 			fill: #fff;
 		}
-
 		h1 {
 			font-size: 32pt;
 			font-weight: 600;
 		}
-
 	</style>
-		
-	<section class="content">
-	
-
+	<div class="content">
 		<h1>
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon" >
 			<path
@@ -79,6 +71,6 @@ let maintPage = `
 		</h1>
 		<p>Our web masters are performing scheduled maintenace.</p>
 		<p>Please check back soon...</p>
-	</section>
+	</div>
 
 `;
